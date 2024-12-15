@@ -30,7 +30,7 @@ load("SDSS_QSO.RData")
 #     while −1 indicates it was not observed by FIRST.
 #  ROSAT = Brightness in the X-ray band, in log(Count rate) from the ROSAT All-Sky Survey
 #     (RASS) in the 0.2–2.4 keV band. −9 indicates not detected by RASS.
-#  MP = Absolute magnitude in the i band
+#  MP = Absolute magnitude in the i band, a measure of luminosity.
 
 
 # Estraggo la colonna z (Redshift)
@@ -48,8 +48,11 @@ z_mag <- dat$z_mag
 first <- dat$FIRST
 rosat <- dat$ROSAT
 mp <- dat$MP
+attach(SDSS_QSO)
 
 library(ggplot2)
+
+summary(dat)
 
 ggplot(dat, aes(x = z)) +
   geom_histogram(bins = 50, fill = "red", color = "black") +
@@ -128,4 +131,23 @@ ggplot(dat, aes(x = z, y = first)) +
     y = "Magnitudine (radio)"
   ) +
   theme_minimal()
+
+
+all <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat, data = dat)
+summary(all)
+
+a <- lm(z ~ u_mag , data=dat)
+summary(a)
+
+# Calcolo della matrice di correlazione tra le variabili, senza considerare gli errori
+dat_without_errors <- dat[, c("z", "u_mag", "g_mag", "r_mag", "i_mag", "z_mag", "FIRST", "ROSAT", "Mp")]
+dat_without_errors <- dat_without_errors[, !colnames(dat_without_errors) %in% "SDSS"]
+head(dat_without_errors)
+matrice_cor <- cor(dat_without_errors)
+print(matrice_cor)
+round(matrice_cor, 2)
+library(corrplot)
+# Matrice di correlazione con titolo
+corrplot(matrice_cor, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45, title = "Matrice di Correlazione",mar=c(0,0,2,0),addCoef.col = "black")
 

@@ -1,0 +1,267 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{imakeidx}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{lmodern}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{float}
+
+\lstset{
+  language=R,
+  basicstyle=\ttfamily\small,      % Font di base
+  keywordstyle=\color{blue}\bfseries, % Parole chiave in blu
+  stringstyle=\color{red},         % Stringhe in rosso
+  commentstyle=\color{gray},       % Commenti in grigio
+  numbers=left,                    % Numeri di riga a sinistra
+  numberstyle=\tiny\color{gray},   % Stile dei numeri di riga
+  stepnumber=1,                    % Numerazione di ogni riga
+  breaklines=true,                 % Interruzione automatica delle righe lunghe
+  frame=single,                    % Riquadro intorno al codice
+  backgroundcolor=\color{white},   % Sfondo bianco
+  showstringspaces=false           % Non mostra spazi nelle stringhe
+}
+
+\makeindex[columns=3, title=Alphabetical Index, intoc]
+
+\begin{document}
+
+\begin{titlepage}
+   \begin{center}
+       \vspace*{1cm}
+
+       \textbf{Analisi Statistica di Dataset Astronomico su Quasar}
+
+       \vspace{0.5cm}
+        %Thesis Subtitle
+            
+       \vspace{1.5cm}
+
+       \textbf{David Megli}
+
+       \vfill
+            
+       %A thesis presented for the degree of\\
+       %Doctor of Philosophy
+            
+       \vspace{0.8cm}
+            
+       %\\
+       Università degli Studi di Firenze\\
+       %Country\\
+       %Date
+            
+   \end{center}
+\end{titlepage}
+
+<<setup, echo=FALSE, include=FALSE>>=
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, highlight = TRUE, message = FALSE, warning = FALSE)
+@
+
+<<setup_dataset, echo=FALSE>>=
+require(astrodatR)
+data("SDSS_QSO")
+dat <- SDSS_QSO
+save(SDSS_QSO, file="SDSS_QSO.RData")
+load("SDSS_QSO.RData")
+# Estraggo la colonna z (Redshift)
+z <- dat$z
+# Estraggo le altre colonne
+u_mag <- dat$u_mag
+sig_u_mag <- dat$sig_u_mag
+g_mag <- dat$g_mag
+sig_g_mag <- dat$sig_g_mag
+r_mag <- dat$r_mag
+sig_r_mag <- dat$sig_r_mag
+i_mag <- dat$i_mag
+sig_i_mag <- dat$sig_i_mag
+z_mag <- dat$z_mag
+first <- dat$FIRST
+rosat <- dat$ROSAT
+mp <- dat$MP
+library(ggplot2)
+@
+
+\title{David Megli - Caso di Studio su Dataset Astronomico su Quasar}
+\tableofcontents
+\nrepage
+\section{Introduzione}
+Il presente lavoro si concentra sull’analisi del dataset SDSS\_QSO, che raccoglie informazioni su oltre 70.000 quasar osservati nel corso della Sloan Digital Sky Survey (SDSS). Questo ampio dataset contiene 15 variabili che descrivono caratteristiche fisiche e fotometriche dei quasar, inclusi il redshift (z), le magnitudini in diverse bande dello spettro elettromagnetico (ultravioletto, visibile, infrarosso), e le luminosità in bande radio e X. L’obiettivo primario di questa analisi è esplorare le relazioni fra queste variabili attraverso un approccio descrittivo e visivo, individuando potenziali correlazioni e tendenze. Inoltre, si cercherà di valutare la presenza di eventuali outliers e di identificare possibili modelli che possano spiegare le relazioni osservate.
+\\Nella prima parte dello studio, verrà effettuata un’analisi descrittiva dei dati per comprendere la distribuzione delle singole variabili e le loro caratteristiche statistiche principali. Successivamente, l'analisi si concentrerà su rappresentazioni grafiche per evidenziare eventuali relazioni fra le variabili. Questo approccio consentirà di osservare, ad esempio, se il redshift è correlato alle magnitudini nelle diverse bande oppure se esistono associazioni fra la luminosità nelle bande radio e X.
+\\Infine, sulla base delle evidenze emerse dall'analisi esplorativa, si procederà alla costruzione di modelli statistici che possano rappresentare le relazioni fra le variabili in modo formale. Questi modelli verranno valutati sia dal punto di vista interpretativo che tramite strumenti grafici, con l’obiettivo di validare e visualizzare le associazioni individuate nei dati.
+
+
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(
+concordance=TRUE
+)
+@
+
+\section{Descrizione del Dataset}
+Il dataset SDSS\_QSO contiene 77.429 osservazioni e 15 variabili ed è un catalogo di oltre 7000 quasar (QSO), prodotti dal 5° Data Release dello Sloan Digital Sky Survey (SDSS; York et al. 2000, Schneider et al. 2007). Fornisce le coordinate SDSS (un dato che fornisce la posizione celeste), redshift (una misura della distanza), magnitudini in cinque bande fotometriche (con errori di misurazione), misure di emissione radio e raggi X e magnitudine assoluta (una misura della luminosità). Questo dataset è stato utilizzato in diversi studi astronomici per esplorare le proprietà dei quasar e le relazioni fra le loro caratteristiche fisiche.
+\\Di seguito è riportata una descrizione delle variabili presenti nel dataset, compresa una breve spiegazione di ciascuna di esse per permetterne la comprensione anche ai non esperti di astronomia:
+\begin{itemize}
+  \item z: rappresenta il Redshift (spostamento verso il rosso). Il Redshift è il fenomeno per cui la luce emessa da un oggetto in allontanamento ha una lunghezza d'onda maggiore rispetto a quella che aveva all'emissione. Questo effetto è dovuto all'espansione dell'Universo e viene utilizzato per determinare la distanza delle sorgenti astronomiche. In questo contesto il Redshift è quindi una misura della distanza e della velocità di allontanamento delle sorgenti. I valori del redshift vanno da zero a infinito, corrispondenti rispettivamente a velocità delle galassie nulla e uguale a quella della luce
+  \item u\_mag e sig\_u\_mag: Rappresentano la luminosità nella banda u (ultravioletto) in magnitudini con deviazione standard (mag). La magnitudine è una scala logaritmica utilizzata per misurare la luminosità delle stelle e delle galassie. Maggiore è il valore della magnitudine, più debole è la luminosità dell'oggetto. L'errore di misurazione (sig\_u\_mag) indica la precisione della misura della magnitudine.
+  \item g\_mag e sig\_g\_mag: Rappresentano la luminosità nella banda g (verde) in magnitudini con deviazione standard (mag) e il corrispettivo errore di misurazione.
+  \item r\_mag e sig\_r\_mag: Rappresentano la luminosità nella banda r (rossa) in magnitudini con deviazione standard (mag) e il corrispettivo errore di misurazione.
+  \item i\_mag e sig\_i\_mag: Rappresentano la luminosità nella banda i (più rossa) in magnitudini con deviazione standard (mag) e il corrispettivo errore di misurazione.
+  \item z\_mag e sig\_z\_mag: Rappresentano la luminosità nella banda z (ancora più rossa) in magnitudini con deviazione standard (mag) e il corrispettivo errore di misurazione.
+  \item FIRST: Rappresenta la luminosità nella banda radio in magnitudini. La luminosità radio è una misura della radiazione elettromagnetica emessa da un oggetto astronomico nella banda delle onde radio. Il valore -1 indica che il quasar non è stato osservato, mentre 0 indica che non è stato rilevato.
+  \item ROSAT: Rappresenta la luminosità nella banda X-ray in magnitudini. La luminosità X-ray è una misura della radiazione elettromagnetica emessa da un oggetto astronomico nella banda dei raggi X. Il valore -9 indica che il quasar non è stato rilevato.
+  \item MP: Rappresenta la magnitudine assoluta nella banda i, una misura della luminosità intrinseca del quasar. La magnitudine assoluta è una misura della luminosità di un oggetto astronomico corretta per la distanza, più in particolare è la magnitudine apparente che un oggetto avrebbe se si trovasse ad una distanza dall'osservatore di 10 parsec (circa 32,6 anni luce). Valori più bassi indicano una maggiore luminosità intrinseca.
+\end{itemize}
+\section{Analisi Descrittiva}
+Questo è il sommario relativo al dataset SDSS\_QSO in cui sono riportate le principali statistiche descrittive per ciascuna variabile presente nel dataset:
+
+<<summary_dataset, echo=TRUE>>=
+summary(dat)
+@
+
+Ho costruito il seguente modello lineare in cui il redshift è spiegato dalle magnitudini nelle diverse bande e dalle luminosità nelle bande radio e X:
+
+<<linear_model, echo=TRUE>>=
+a <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat,
+        data = dat)
+summary(a)
+@
+
+Come si può osservare dai risultati del modello, il valore di R squared è di 0.4615, il che indica che il modello spiega circa il 46\% della variazione nel redshift. Inoltre, i coefficienti stimati per le variabili predittive sono tutti significativi, con p-values estremamente bassi. Questo suggerisce che le magnitudini nelle diverse bande e le luminosità nelle bande radio e X sono associate in modo significativo al redshift dei quasar. Tuttavia il modello lineare semplifica la complessità dei dati e il basso valore di R squared indica che questo modello non è adatto a spiegare i dati. Pertanto, ulteriori analisi e modelli più sofisticati sono necessari per comprendere appieno le relazioni presenti nei dati.
+\\Ho calcolato la matrice di correlazione tra le variabili del dataset, per meglio comprendere le relazioni esistenti:
+
+<<correlation_matrix, echo=TRUE>>=
+# Calcolo della matrice di correlazione tra le variabili
+# (senza considerare gli errori associati alle magnitudini)
+dat_without_errors <- 
+  dat[, c("z", "u_mag", "g_mag", "r_mag", "i_mag", "z_mag", "FIRST",
+          "ROSAT", "Mp")]
+# Vediamo un'anteprima del dataset
+head(dat_without_errors)
+# Calcolo la matrice di correlazione e approssimo alla seconda cifra
+# decimale
+matrice_cor <- cor(dat_without_errors)
+round(matrice_cor, 2)
+library(corrplot)
+# Plotto la Matrice di correlazione
+corrplot(matrice_cor, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45,
+         title = "Matrice di Correlazione",
+         mar=c(0,0,2,0), addCoef.col = "black")
+@
+
+Dalla Matrice di Correlazione si osserva che il redshift è correlato positivamente con le magnitudini nelle bande ultravioletto, visibile e infrarosso, e negativamente con la luminosità nelle bande radio e X. Queste relazioni sono coerenti con le conoscenze astronomiche, poiché il redshift è associato alla distanza delle sorgenti e alla loro velocità di allontanamento. Quindi, quasar più distanti (con redshift maggiore) appaiono più deboli nelle bande ottiche e più luminosi nelle bande radio e X.
+\\Inoltre, le magnitudini nelle diverse bande e le luminosità radio e X sono correlate tra loro, suggerendo che le proprietà fisiche dei quasar siano strettamente legate. Ad esempio, quasar più luminosi nelle bande radio tendono ad essere più luminosi anche nelle bande X e viceversa. Queste relazioni possono essere esplorate ulteriormente attraverso rappresentazioni grafiche che mettano in evidenza le associazioni tra le variabili.
+\\Altre considerazioni:
+\begin{itemize}
+  \item Correlazioni tra le magnitudini fotometriche (u\_mag, g\_mag, r\_mag, i\_mag, z\_mag): Le magnitudini g\_mag, r\_mag, i\_mag e z\_mag sono fortemente correlate tra loro, con coefficienti di correlazione prossimi a 1 (superiori a 0.9). Questo suggerisce che queste grandezze seguono un andamento simile e possono essere legate alle stesse proprietà fisiche. La magnitudine u\_mag presenta una correlazione leggermente inferiore con le altre magnitudini (circa 0.75–0.79), ma è comunque significativa. Queste correlazioni indicano che le magnitudini nelle diverse bande dello spettro elettromagnetico sono associate e possono fornire informazioni complementari sulle proprietà dei quasar.
+  \item Correlazione negativa tra z e Mp: Il coefficiente di correlazione tra z e Mp è -0.79, che indica una forte correlazione negativa. All'aumentare di z (redshift), il valore di Mp (magnitudine assoluta) tende a diminuire. Questo è coerente con il fatto che quasar più distanti (con redshift maggiore) sono più luminosi intrinsecamente. In generale, i quasar più lontani tendono ad essere più luminosi perché i quasar sono alimentati da buchi neri supermassicci al centro di galassie lontane e in rapida crescita. Quando guardiamo quasar molto distanti, stiamo osservando l'universo com'era miliardi di anni fa, e durante quel periodo, può essere che le galassie che ospitano questi quasar fossero più attive e brillanti rispetto a quelle che osserviamo più vicine a noi.
+\\Inoltre, l'universo si sta espandendo, e la luce dei quasar più lontani è soggetta a redshift, cioè il loro spettro viene spostato verso lunghezze d'onda più lunghe. Questo può rendere i quasar lontani più difficili da osservare.
+\end{itemize}
+Di seguito è riportata la distribuzione del redshift nel dataset, che mostra come i valori siano distribuiti in un intervallo compreso tra 0 e 6, con una concentrazione maggiore intorno a valori bassi (z < 2) e una coda lunga verso valori più alti (z > 2).
+<<Distribuzione del Redshift, echo=TRUE, fig.width=8, fig.height=5>>=
+ggplot(dat, aes(x = z)) +
+  geom_histogram(bins = 50, fill = "red", color = "black") +
+  labs(
+    title = "Distribuzione del Redshift",
+    x = "Redshift (z)",
+    y = "Conteggio"
+  )
+@
+Come accennato, la distribuzione è asimmetrica, con una chiara tendenza a sinistra (positiva), mostrando un picco tra z = 1 e z = 2. La maggior parte dei quasar ha redshift compresi tra 0.5 e 2.5, con un massimo attorno a z \~ 1.5. Dopo questo picco, la frequenza dei redshift diminuisce rapidamente.
+\\L'elevata concentrazione di quasar con redshift tra 1 e 2 suggerisce che molti di essi si trovano a distanze intermedie dall'osservatore (ricordiamo che il redshift è direttamente legato alla distanza cosmologica degli oggetti celesti). Questo potrebbe essere dovuto a una maggiore osservabilità di quasar in questa gamma di distanza o a caratteristiche evolutive degli stessi quasar.
+\\La presenza di una coda lunga verso valori più elevati di redshift (z > 3) indica che esistono alcuni quasar molto distanti, ma sono relativamente rari rispetto a quelli con z compresi tra 1 e 2. Questo può significare che i quasar più lontani sono più difficili da osservare o che si sono formati in epoche più remote dell'universo.
+\\È evidente che il numero di quasar con redshift molto basso è limitato. Questo potrebbe riflettere la loro rarità nelle vicinanze cosmologiche o una difficoltà osservativa nell'identificarli in questa gamma di redshift.
+\\Di seguito sono riportati alcuni scatter plot relativi alla relazione tra il redshift e le magnitudini nelle diverse bande dello spettro elettromagnetico, nonché alla luminosità nelle bande radio e X. Queste visualizzazioni permettono di esplorare le relazioni fra le variabili e di individuare eventuali pattern o tendenze nei dati.
+<<Relazione tra Redshift e Magnitudine nella banda X-ray, echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine ROSAT (X-ray)
+ggplot(dat, aes(x = z, y = rosat)) +
+  geom_point(alpha = 0.5, color = "darkorchid4") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda X-ray",
+    x = "Redshift (z)",
+    y = "Magnitudine (X-ray)"
+  ) +
+  theme_minimal()
+@
+<<Relazione tra Redshift e Magnitudine nella banda u (ultraviolet), echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine u
+ggplot(dat, aes(x = z, y = u_mag)) +
+  geom_point(alpha = 0.5, color = "purple") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda u (ultraviolet)",
+    x = "Redshift (z)",
+    y = "Magnitudine (u)"
+  ) +
+  theme_minimal()
+@
+<<Relazione tra Redshift e Magnitudine nella banda g (green), echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine g
+ggplot(dat, aes(x = z, y = g_mag)) +
+  geom_point(alpha = 0.5, color = "green") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda g (green)",
+    x = "Redshift (z)",
+    y = "Magnitudine (g)"
+  ) +
+  theme_minimal()
+@
+<<Relazione tra Redshift e Magnitudine nella banda r (red), echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine r
+ggplot(dat, aes(x = z, y = r_mag)) +
+  geom_point(alpha = 0.5, color = "red") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda r (red)",
+    x = "Redshift (z)",
+    y = "Magnitudine (r)"
+  ) +
+  theme_minimal()
+@
+<<Relazione tra Redshift e Magnitudine nella banda i (further red), echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine i
+ggplot(dat, aes(x = z, y = i_mag)) +
+  geom_point(alpha = 0.5, color = "brown3") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda i (further red)",
+    x = "Redshift (z)",
+    y = "Magnitudine (i)"
+  ) +
+  theme_minimal()
+@
+<<Relazione tra Redshift e Magnitudine nella banda z (further red), echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine z
+ggplot(dat, aes(x = z, y = z_mag)) +
+  geom_point(alpha = 0.5, color = "darkred") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda z (further red)",
+    x = "Redshift (z)",
+    y = "Magnitudine (z)"
+  ) +
+  theme_minimal()
+@
+<<Relazione tra Redshift e Magnitudine nella banda radio, echo=TRUE, fig.width=8, fig.height=5>>=
+# Scatter plot della magnitudine FIRST (radio)
+ggplot(dat, aes(x = z, y = first)) +
+  geom_point(alpha = 0.5, color = "black") +
+  labs(
+    title = "Relazione tra Redshift e Magnitudine nella banda radio",
+    x = "Redshift (z)",
+    y = "Magnitudine (radio)"
+  ) +
+  theme_minimal()
+
+# Scatter plot della magnitudine MP (Absolute magnitude in the i band)
+@
+
+<<linear model 1, echo=TRUE>>=
+a <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat, data = dat)
+summary(a)
+@
+
+\section{Modelli}
+
+
+\end{document}  

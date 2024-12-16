@@ -88,9 +88,9 @@ library(ggplot2)
 \title{David Megli - Caso di Studio su Dataset Astronomico su Quasar}
 \tableofcontents
 \newpage
-\section{Introduzione}
+\chapter{Introduzione}
 Il presente lavoro si concentra sull’analisi del dataset SDSS\_QSO, che raccoglie informazioni su oltre 70.000 quasar osservati nel corso della Sloan Digital Sky Survey (SDSS). Questo ampio dataset contiene 15 variabili che descrivono caratteristiche fisiche e fotometriche dei quasar, inclusi il redshift (z), le magnitudini in diverse bande dello spettro elettromagnetico (ultravioletto, visibile, infrarosso), e le luminosità in bande radio e X. L’obiettivo primario di questa analisi è esplorare le relazioni fra queste variabili attraverso un approccio descrittivo e visivo, individuando potenziali correlazioni e tendenze. Inoltre, si cercherà di valutare la presenza di eventuali outliers e di identificare possibili modelli che possano spiegare le relazioni osservate.
-\subsection{Obiettivi dello Studio}
+\section{Obiettivi dello Studio}
 Nella prima parte dello studio, verrà effettuata un’analisi descrittiva dei dati per comprendere la distribuzione delle singole variabili e le loro caratteristiche statistiche principali. Successivamente, l'analisi si concentrerà su rappresentazioni grafiche per evidenziare le relazioni fra le variabili. Questo approccio consentirà di osservare, ad esempio, se il redshift è correlato alle magnitudini nelle diverse bande oppure se esistono associazioni fra la luminosità nelle bande radio e X.
 \\I principali obiettivi dello studio sono:
 \begin{itemize}
@@ -107,7 +107,7 @@ concordance=TRUE
 )
 @
 
-\subsection{Descrizione del Dataset}
+\section{Descrizione del Dataset}
 Il dataset SDSS\_QSO contiene 77.429 osservazioni di quasar (QSO) e 15 variabili, prodotte dal 5° Data Release dello Sloan Digital Sky Survey (SDSS; York et al. 2000, Schneider et al. 2007). Fornisce le coordinate SDSS (un dato che fornisce la posizione celeste), redshift (una misura della distanza), magnitudini in cinque bande fotometriche (con errori di misurazione), misure di emissione radio e raggi X e magnitudine assoluta (una misura della luminosità). Questo dataset è stato utilizzato in diversi studi astronomici per esplorare le proprietà dei quasar e le relazioni fra le loro caratteristiche fisiche.
 \\Di seguito è riportata una descrizione delle variabili presenti nel dataset, compresa una breve spiegazione di ciascuna di esse per permetterne la comprensione anche ai non esperti di astronomia:
 \begin{itemize}
@@ -121,7 +121,7 @@ Il dataset SDSS\_QSO contiene 77.429 osservazioni di quasar (QSO) e 15 variabili
   \item ROSAT: Rappresenta la luminosità nella banda X-ray in magnitudini. La luminosità X-ray è una misura della radiazione elettromagnetica emessa da un oggetto astronomico nella banda dei raggi X. Il valore -9 indica che il quasar non è stato rilevato.
   \item MP: Rappresenta la magnitudine assoluta nella banda i, una misura della luminosità intrinseca del quasar. La magnitudine assoluta è una misura della luminosità di un oggetto astronomico corretta per la distanza, più in particolare è la magnitudine apparente che un oggetto avrebbe se si trovasse ad una distanza dall'osservatore di 10 parsec (circa 32,6 anni luce). Valori più bassi indicano una maggiore luminosità intrinseca.
 \end{itemize}
-\section{Analisi Descrittiva}
+\chapter{Analisi Descrittiva}
 Questo è il sommario relativo al dataset SDSS\_QSO in cui sono riportate le principali statistiche descrittive per ciascuna variabile presente nel dataset:
 
 <<summary_dataset, echo=TRUE>>=
@@ -282,7 +282,7 @@ Alcune osservazioni che possiamo fare sulle relazioni tra le bande fotometriche 
   \item Riguardo le distribuzioni univariate, ovvero quelle sulle diagonali, le bande u,g,r,i,z mostrano picchi evidenti, suggerendo che i valori sono concentrati in determinate regioni.
   \item Le relazioni bivariate mostrano che le bande r ed i, i e z, g ed r, g ed i sono fortemente correlate fra loro, con una relazione lineare evidente. Questo è coerente con quanto osservato nella matrice di correlazione, e suggerisce che la luminosità nelle bande adiacenti (particolarmente g,r,i,z) segue una tendenza molto simile nei quasar. Le bande più spostate verso l’ultravioletto (u) hanno correlazioni lievemente minori, ma comunque piuttosto elevate.
 \end{itemize}
-\section{Analisi degli Outliers}
+\chapter{Analisi degli Outliers}
 Questa sezione ha l'obiettivo di analizzare gli outliers presenti nel dataset, individuati nella sezione precedente sia in termini numerici che grafici (nei vari plot). In particolare si cercherà di identificare le osservazioni nella banda fotometrica che si discostano significativamente con l'obiettivo di rispondere alle seguenti domande:
 \begin{enumerate}
   \item Quali quasar si distinguono come outlier nelle relazioni tra le bande fotometriche u,g,r,i,z?
@@ -366,7 +366,7 @@ Come possiamo osservare dal grafico a barre, e dai valori numerici, la media deg
 %\\In questo dataset significa le identificazioni dei quasar sono complete per le magnitudini i più brillanti (fino a 19), mentre si trovano a essere incomplete per magnitudini più deboli (fatte di oggetti più lontani o meno luminosi).
 
 
-\section{Analisi delle Relazioni}
+\chapter{Analisi delle Relazioni}
 In questa sezione verranno esplorate le relazioni tra le variabili del dataset attraverso rappresentazioni grafiche e analisi quantitative. In particolare, si cercherà di individuare eventuali associazioni tra il redshift e le magnitudini nelle diverse bande fotometriche, nonché tra il redshift e le luminosità nelle bande radio e X. Questo per cercare di comprendere meglio le proprietà dei quasar e le relazioni fra le loro caratteristiche fisiche.
 \\Per andare a studiare le relazioni fra le variabili, prima di tutto rimuoviamo gli esempi che hanno valori mancanti oppure outliers.
 <<rimozione degli esempi con valori mancanti, echo=TRUE>>=
@@ -421,10 +421,12 @@ graph <- graph - "sig_u_mag" - "sig_g_mag" - "sig_r_mag" - "sig_i_mag" - "sig_z_
 plot(graph, vertex.label = colnames(bic_dat_sw_b2), main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
      ,vertex.size=30,edge.width=2,vertex.labels=colnames(bic_dat_sw_b2),edge.curved=0.2)
 @
-
-\section{Predizione del Redshift}
+Rispetto al grafo precedente (con tutte le variabili), questo grafo mostra una riduzione del numero di archi (connessioni) tra i nodi, il metodo Stepwise Backward ha eliminato le connessioni meno significative in termini di ottimizzazione del BIC, mantenendo solo quelle che contribuiscono maggiormente alla parsimonia del modello. Il Redshift rimane collegato alle bande fotometriche, questo suggerisce che il redshift ha ancora forti relazioni con le luminosità osservate nelle diverse bande fotometriche.
+\\Le bande u_mag, g_mag, r_mag, i_mag, z_mag continuano ad essere connesse fra loro, indicando forti correlazioni tra le magnitudini osservate nelle diverse lunghezze d'onda.
+\\FIRST (radio) ha connessioni con meno variabili rispetto al modello completo, suggerendo una minor influenza diretta nel contesto ottico-X-ray rispetto alle bande fotometriche. Tuttavia questo potrebbe essere dobuto a una diversa scala di misura.
+\chapter{Predizione del Redshift}
 In questa sezione verranno cercate ed analizzate eventuali dipendenze fra il redshift e le altre variabili presenti nel dataset. In particolare, si cercherà di costruire un modello predittivo per il redshift basato sulle magnitudini nelle diverse bande e sulle luminosità nelle bande radio e X. L'obiettivo è di valutare se le proprietà fotometriche e spettrali dei quasar possano essere utilizzate per predire il redshift, che è una misura della distanza e della velocità di allontanamento delle sorgenti.
-\subsection{Divisione del Dataset}
+\section{Divisione del Dataset}
 Prima di procedere con la costruzione del modello predittivo, è necessario dividere il dataset in un set di addestramento e un set di test. Questo permette di valutare le prestazioni del modello su dati non utilizzati durante la fase di addestramento, fornendo una stima più accurata della sua capacità predittiva. In questo caso, verrà utilizzato il 70\% dei dati per l'addestramento e il 30\% per il test.
 <<divisione del dataset, echo=TRUE>>=
 # Divisione dei dati in training e test set
@@ -437,7 +439,7 @@ test_data <- data_model[-train_index, ]
 cat("Training set:", nrow(train_data), "righe\n")
 cat("Test set:", nrow(test_data), "righe\n")
 @
-\subsection{Ricerca del Modello}
+\section{Ricerca del Modello}
 Viene definito adesso un metodo per la valutazione del modello, che verrà utilizzato per valutare le prestazioni dei modelli predittivi. In particolare, verrà utilizzato il coefficiente di determinazione R squared, che misura la proporzione di varianza spiegata dal modello rispetto alla varianza totale dei dati. Un valore di R squared vicino a 1 indica un modello che spiega bene i dati, mentre un valore vicino a 0 indica un modello che non è in grado di spiegare la variazione osservata. Verranno utilizzati anche altri indicatori come il Mean Absolute Error (MAE) e il Root Mean Squared Error (RMSE), che misurano la differenza tra i valori predetti e quelli osservati nei dati di test.
 <<funzione per valutazione del modello, echo=FALSE>>=
 library(Metrics)
@@ -458,7 +460,7 @@ evaluate_model <-function(model, test_data, model_name){
     theme_minimal()
 }
 @
-\subsection{Modello di Regressione Lineare}
+\section{Modello di Regressione Lineare}
 Per costruire un modello predittivo per il redshift, verrà utilizzata una regressione lineare multipla che spiega il redshift in funzione delle magnitudini nelle bande fotometriche e delle luminosità nelle bande radio e X. Questo modello permette di valutare l'importanza relativa delle variabili predittive e di stimare i coefficienti di regressione associati a ciascuna di esse.
 <<modello di regressione lineare, echo=TRUE>>=
 # Modello di regressione lineare
@@ -470,7 +472,7 @@ evaluate_model(lm_model, test_data, "Regressione Lineare")
 @
 Questo modello di regressione lineare spiega circa il 43\% della variazione nel redshift, con un Mean Absolute Error (MAE) di 0.49, un Root Mean Squared Error (RMSE) di 0.62 e un R-squared di 0.43. Il grafico mostra la relazione tra i valori reali e predetti del redshift, con una linea rossa che rappresenta la relazione ideale (valori reali = valori predetti). I punti neri rappresentano i valori reali e predetti del redshift, e la loro distribuzione indica quanto bene il modello sia in grado di prevedere i valori osservati.
 \\Sembra che tutte le variabili predittive siano significative, con p-values molto basse, il che suggerisce che le magnitudini nelle bande fotometriche sono associate in modo significativo al redshift dei quasar. Tuttavia, il basso valore di R squared e l'alto valore di RMSE indicano che il modello lineare non è in grado di spiegare appieno la variazione del redshift dei quasar. Questo potrebbe essere dovuto alla presenza di relazioni non lineari o complesse tra le variabili, che non sono catturate da un modello lineare.
-\subsection{Modello con DAG}
+\section{Modello con DAG}
 Un'altra tecnica per la costruzione di modelli predittivi è l'utilizzo di grafi diretti aciclici (DAG), che rappresentano le dipendenze causali tra le variabili del dataset. Questi modelli permettono di esplorare le relazioni tra le variabili e di identificare le dipendenze dirette e indirette tra di esse. In questo caso, verrà utilizzato un modello DAG per tentare di predire il redshift in funzione delle magnitudini nelle bande fotometriche.
 <<modello con DAG, echo=TRUE>>=
 # Modello con DAG
@@ -480,14 +482,14 @@ summary(dag_model)
 # Valutazione del modello
 evaluate_model(dag_model, test_data, "DAG")
 @
-\subsection{Modello con Random Forest}
+\section{Modello con Random Forest}
 <<modello con Random Forest, echo=TRUE>>=
 library(randomForest)
 rf_model <- randomForest(z ~ ., data = train_data, ntree = 50)
 print(rf_model)
 evaluate_model(rf_model, test_data, "Random Forest")
 @
-\subsection{Modello con Gradient Boosting Machine}
+\section{Modello con Gradient Boosting Machine}
 <<modello con Gradient Boosting Machine, echo=TRUE>>=
 library(gbm)
 gbm_model <- gbm(z ~ ., data = train_data, n.trees = 1000, distribution = "gaussian", interaction.depth = 4)

@@ -87,11 +87,17 @@ library(ggplot2)
 
 \title{David Megli - Caso di Studio su Dataset Astronomico su Quasar}
 \tableofcontents
-\nrepage
+\newpage
 \section{Introduzione}
 Il presente lavoro si concentra sull’analisi del dataset SDSS\_QSO, che raccoglie informazioni su oltre 70.000 quasar osservati nel corso della Sloan Digital Sky Survey (SDSS). Questo ampio dataset contiene 15 variabili che descrivono caratteristiche fisiche e fotometriche dei quasar, inclusi il redshift (z), le magnitudini in diverse bande dello spettro elettromagnetico (ultravioletto, visibile, infrarosso), e le luminosità in bande radio e X. L’obiettivo primario di questa analisi è esplorare le relazioni fra queste variabili attraverso un approccio descrittivo e visivo, individuando potenziali correlazioni e tendenze. Inoltre, si cercherà di valutare la presenza di eventuali outliers e di identificare possibili modelli che possano spiegare le relazioni osservate.
-\\Nella prima parte dello studio, verrà effettuata un’analisi descrittiva dei dati per comprendere la distribuzione delle singole variabili e le loro caratteristiche statistiche principali. Successivamente, l'analisi si concentrerà su rappresentazioni grafiche per evidenziare eventuali relazioni fra le variabili. Questo approccio consentirà di osservare, ad esempio, se il redshift è correlato alle magnitudini nelle diverse bande oppure se esistono associazioni fra la luminosità nelle bande radio e X.
-\\Infine, sulla base delle evidenze emerse dall'analisi esplorativa, si procederà alla costruzione di modelli statistici che possano rappresentare le relazioni fra le variabili in modo formale. Questi modelli verranno valutati sia dal punto di vista interpretativo che tramite strumenti grafici, con l’obiettivo di validare e visualizzare le associazioni individuate nei dati.
+\subsection{Obiettivi dello Studio}
+Nella prima parte dello studio, verrà effettuata un’analisi descrittiva dei dati per comprendere la distribuzione delle singole variabili e le loro caratteristiche statistiche principali. Successivamente, l'analisi si concentrerà su rappresentazioni grafiche per evidenziare le relazioni fra le variabili. Questo approccio consentirà di osservare, ad esempio, se il redshift è correlato alle magnitudini nelle diverse bande oppure se esistono associazioni fra la luminosità nelle bande radio e X.
+\\I principali obiettivi dello studio sono:
+\begin{itemize}
+  \item Analisi descrittiva del dataset SDSS\_QSO e utilizzo di modelli grafici per comprendere i dati e le relazioni fra le variabili.
+  \item Analisi degli outliers per identificare le osservazioni anomale e valutare la loro relazione con gli errori di misura.
+  \item Costruzione di un modello predittivo per il redshift basato sulle magnitudini e le luminosità nelle bande fotometriche.
+\end{itemize}
 
 
 <<include=FALSE>>=
@@ -101,8 +107,8 @@ concordance=TRUE
 )
 @
 
-\section{Descrizione del Dataset}
-Il dataset SDSS\_QSO contiene 77.429 osservazioni e 15 variabili ed è un catalogo di oltre 7000 quasar (QSO), prodotti dal 5° Data Release dello Sloan Digital Sky Survey (SDSS; York et al. 2000, Schneider et al. 2007). Fornisce le coordinate SDSS (un dato che fornisce la posizione celeste), redshift (una misura della distanza), magnitudini in cinque bande fotometriche (con errori di misurazione), misure di emissione radio e raggi X e magnitudine assoluta (una misura della luminosità). Questo dataset è stato utilizzato in diversi studi astronomici per esplorare le proprietà dei quasar e le relazioni fra le loro caratteristiche fisiche.
+\subsection{Descrizione del Dataset}
+Il dataset SDSS\_QSO contiene 77.429 osservazioni di quasar (QSO) e 15 variabili, prodotte dal 5° Data Release dello Sloan Digital Sky Survey (SDSS; York et al. 2000, Schneider et al. 2007). Fornisce le coordinate SDSS (un dato che fornisce la posizione celeste), redshift (una misura della distanza), magnitudini in cinque bande fotometriche (con errori di misurazione), misure di emissione radio e raggi X e magnitudine assoluta (una misura della luminosità). Questo dataset è stato utilizzato in diversi studi astronomici per esplorare le proprietà dei quasar e le relazioni fra le loro caratteristiche fisiche.
 \\Di seguito è riportata una descrizione delle variabili presenti nel dataset, compresa una breve spiegazione di ciascuna di esse per permetterne la comprensione anche ai non esperti di astronomia:
 \begin{itemize}
   \item z: rappresenta il Redshift (spostamento verso il rosso). Il Redshift è il fenomeno per cui la luce emessa da un oggetto in allontanamento ha una lunghezza d'onda maggiore rispetto a quella che aveva all'emissione. Questo effetto è dovuto all'espansione dell'Universo e viene utilizzato per determinare la distanza delle sorgenti astronomiche. In questo contesto il Redshift è quindi una misura della distanza e della velocità di allontanamento delle sorgenti. I valori del redshift vanno da zero a infinito, corrispondenti rispettivamente a velocità delle galassie nulla e uguale a quella della luce
@@ -175,7 +181,7 @@ Come accennato, la distribuzione è asimmetrica, con una chiara tendenza a sinis
 \\L'elevata concentrazione di quasar con redshift tra 1 e 2 suggerisce che molti di essi si trovano a distanze intermedie dall'osservatore (ricordiamo che il redshift è direttamente legato alla distanza cosmologica degli oggetti celesti). Questo potrebbe essere dovuto a una maggiore osservabilità di quasar in questa gamma di distanza o a caratteristiche evolutive degli stessi quasar.
 \\La presenza di una coda lunga verso valori più elevati di redshift (z > 3) indica che esistono alcuni quasar molto distanti, ma sono relativamente rari rispetto a quelli con z compresi tra 1 e 2. Questo può significare che i quasar più lontani sono più difficili da osservare o che si sono formati in epoche più remote dell'universo.
 \\È evidente che il numero di quasar con redshift molto basso è limitato. Questo potrebbe riflettere la loro rarità nelle vicinanze cosmologiche o una difficoltà osservativa nell'identificarli in questa gamma di redshift.
-\\Di seguito sono riportati alcuni scatter plot relativi alla relazione tra il redshift e le magnitudini nelle diverse bande dello spettro elettromagnetico, nonché alla luminosità nelle bande radio e X. Queste visualizzazioni permettono di esplorare le relazioni fra le variabili e di individuare eventuali pattern o tendenze nei dati.
+\\Di seguito sono riportati alcuni scatter plot relativi alla relazione tra il redshift e le magnitudini nelle diverse bande dello spettro elettromagnetico, nonché alla luminosità nelle bande radio e X. Queste visualizzazioni permettono di esplorare le relazioni fra le variabili e di individuare eventuali pattern o tendenze nei dati. In particolare sono stati scelti grafici che mettono in relazione il redshift con le magnitudini nelle bande u (ultravioletto), g (verde), r (rossa), i (infrarosso), z (further red), nonché con la luminosità nelle bande radio (FIRST) e X-ray (ROSAT), per capire se sussiste una relazione con il redshift.
 <<Relazione tra Redshift e Magnitudine nella banda X-ray, echo=TRUE, fig.width=8, fig.height=5>>=
 # Scatter plot della magnitudine ROSAT (X-ray)
 ggplot(dat, aes(x = z, y = rosat)) +
@@ -192,7 +198,8 @@ ggplot(dat, aes(x = z, y = rosat)) +
 ggplot(dat, aes(x = z, y = u_mag)) +
   geom_point(alpha = 0.5, color = "purple") +
   labs(
-    title = "Relazione tra Redshift e Magnitudine nella banda u (ultraviolet)",
+    title = "Relazione tra Redshift e Magnitudine nella banda u
+    (ultraviolet)",
     x = "Redshift (z)",
     y = "Magnitudine (u)"
   ) +
@@ -203,7 +210,8 @@ ggplot(dat, aes(x = z, y = u_mag)) +
 ggplot(dat, aes(x = z, y = g_mag)) +
   geom_point(alpha = 0.5, color = "green") +
   labs(
-    title = "Relazione tra Redshift e Magnitudine nella banda g (green)",
+    title = "Relazione tra Redshift e Magnitudine nella banda g
+    (green)",
     x = "Redshift (z)",
     y = "Magnitudine (g)"
   ) +
@@ -225,7 +233,8 @@ ggplot(dat, aes(x = z, y = r_mag)) +
 ggplot(dat, aes(x = z, y = i_mag)) +
   geom_point(alpha = 0.5, color = "brown3") +
   labs(
-    title = "Relazione tra Redshift e Magnitudine nella banda i (further red)",
+    title = "Relazione tra Redshift e Magnitudine nella banda i
+    (further red)",
     x = "Redshift (z)",
     y = "Magnitudine (i)"
   ) +
@@ -236,7 +245,8 @@ ggplot(dat, aes(x = z, y = i_mag)) +
 ggplot(dat, aes(x = z, y = z_mag)) +
   geom_point(alpha = 0.5, color = "darkred") +
   labs(
-    title = "Relazione tra Redshift e Magnitudine nella banda z (further red)",
+    title = "Relazione tra Redshift e Magnitudine nella banda z
+    (further red)",
     x = "Redshift (z)",
     y = "Magnitudine (z)"
   ) +
@@ -252,16 +262,239 @@ ggplot(dat, aes(x = z, y = first)) +
     y = "Magnitudine (radio)"
   ) +
   theme_minimal()
+@
+Dai grafici che mettono in relazione le bande u,g,r,i e z con il Redshift possiamo osservare che le magnitudini nelle diverse bande dello spettro elettromagnetico sono correlate al redshift dei quasar. In particolare, le magnitudini nelle bande ultravioletto (u) e visibile (g,r,i,z) tendono ad aumentare con il redshift, mentre la magnitudine nella banda X-ray (ROSAT) tende a diminuire. Questo è coerente con le relazioni osservate nella matrice di correlazione, che indicano che il redshift è positivamente correlato alle magnitudini nelle bande ottiche e negativamente correlato alla luminosità nella banda X-ray.
+\\Non sembra esserci invece particolare relazione fra redshift e magnitudine nella banda radio (FIRST), come si può osservare dal grafico.
+\\Nelle bande u, g, r, i, z possiamo osservare molti outliers, con valori nulli. Questi outliers potrebbero essere dovuti a errori di misurazione o a particolari proprietà fisiche dei quasar. Inoltre, la presenza di valori nulli potrebbe indicare che alcune osservazioni non sono state rilevate o sono incomplete.
+% <<linear model 1, echo=TRUE>>=
+% a <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat,
+%         data = dat)
+% summary(a)
+% @
+Di seguito sono riportati i grafici di dispersione (Scatterplot Matrix) che mostrano tutte le coppie possibili di bande fotometriche u,g,r,i,z.
+<<scatter plot matrix, echo=TRUE, fig.width=8, fig.height=5>>=
+# Grafici di dispersione (Scatterplot Matrix)
+library(GGally)
+ggpairs(data.frame(u_mag, g_mag, r_mag, i_mag, z_mag))
+@
+Alcune osservazioni che possiamo fare sulle relazioni tra le bande fotometriche sono le seguenti:
+\begin{itemize}
+  \item Riguardo le distribuzioni univariate, ovvero quelle sulle diagonali, le bande u,g,r,i,z mostrano picchi evidenti, suggerendo che i valori sono concentrati in determinate regioni.
+  \item Le relazioni bivariate mostrano che le bande r ed i, i e z, g ed r, g ed i sono fortemente correlate fra loro, con una relazione lineare evidente. Questo è coerente con quanto osservato nella matrice di correlazione, e suggerisce che la luminosità nelle bande adiacenti (particolarmente g,r,i,z) segue una tendenza molto simile nei quasar. Le bande più spostate verso l’ultravioletto (u) hanno correlazioni lievemente minori, ma comunque piuttosto elevate.
+\end{itemize}
+\section{Analisi degli Outliers}
+Questa sezione ha l'obiettivo di analizzare gli outliers presenti nel dataset, individuati nella sezione precedente sia in termini numerici che grafici (nei vari plot). In particolare si cercherà di identificare le osservazioni nella banda fotometrica che si discostano significativamente con l'obiettivo di rispondere alle seguenti domande:
+\begin{enumerate}
+  \item Quali quasar si distinguono come outlier nelle relazioni tra le bande fotometriche u,g,r,i,z?
+  \item Come si relazionano questi outlier agli errori di misura?
+\end{enumerate}
+Per rispondere a queste domande, si procederà con l'identificazione degli outlier nelle bande fotometriche u,g,r,i,z e l'analisi dei loro errori di misura. Andiamo intanto a suddividere il dataset in due parti: una contenente i dati normali e l'altra contenente gli outlier.
+<<stampa degli outliers, echo=TRUE>>=
+# Calcolo dello Z-score per ciascuna colonna
+z_scores <- scale(dat[, c("u_mag", "g_mag", "r_mag", "i_mag", "z_mag")])
+# Identificazione outlier dove |Z-score| > 3
+outliers_u <- which(abs(z_scores[, "u_mag"]) > 3)
+outliers_g <- which(abs(z_scores[, "g_mag"]) > 3)
+outliers_r <- which(abs(z_scores[, "r_mag"]) > 3)
+outliers_i <- which(abs(z_scores[, "i_mag"]) > 3)
+outliers_z <- which(abs(z_scores[, "z_mag"]) > 3)
+# Unione di outliers identificati
+outliers_indices <- unique(c(outliers_u, outliers_g, outliers_r, 
+                             outliers_i, outliers_z))
+# Creazione di un dataframe con soli outlier
+outliers_data <- dat[outliers_indices, ]
+normal_data <- dat[-outliers_indices, ]  # Esclusione degli outlier
+# Calcolo della media degli errori per outlier e dati normali
+error_means_outliers <- colMeans(outliers_data[, c("sig_u_mag",
+  "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")], na.rm = TRUE)
+error_means_normal <- colMeans(normal_data[, c("sig_u_mag",
+  "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")], na.rm = TRUE)
+# Stampa a video dei risultati
+print("Media degli errori di misura per gli outlier:")
+print(error_means_outliers)
 
-# Scatter plot della magnitudine MP (Absolute magnitude in the i band)
+print("Media degli errori di misura per i dati normali:")
+print(error_means_normal)
+
+print("Rapporto tra le medie degli errori di misura
+      per outlier e dati normali:")
+print(error_means_outliers / error_means_normal)
+@
+Andiamo adesso a vedere il plot degli errori medi per gli outlier e i dati normali per ciascuna banda fotometrica.
+<<plot degli errori medi, echo=TRUE, fig.width=8, fig.height=5>>=
+# Visualizzazione della differenza con un grafico
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+# Prepararazione dei dati per il grafico
+error_df <- data.frame(
+  Banda = c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag",
+            "sig_z_mag"),
+  Errore_Outlier = error_means_outliers,
+  Errore_Normale = error_means_normal
+)
+error_long <- error_df %>%
+  pivot_longer(cols = c(Errore_Outlier, Errore_Normale), 
+               names_to = "Tipo", 
+               values_to = "Errore")
+# Grafico a barre per confrontare gli errori
+ggplot(error_long, aes(x = Banda, y = Errore, fill = Tipo)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(title = "Confronto degli errori di misura tra outliers e
+       dati normali",
+       y = "Errore medio", x = "Bande") +
+  scale_fill_manual(values = c("Errore_Outlier" = "red",
+                               "Errore_Normale" = "blue"),
+                    labels = c("Errore_Outlier" = "Outlier",
+                               "Errore_Normale" = "Normale")) +
+  guides(fill = guide_legend(title = "Legenda")) +
+  theme_minimal()
+@
+Come possiamo osservare dal grafico a barre, e dai valori numerici, la media degli errori di misura per gli outlier è più alta rispetto ai dati normali. In particolare possiamo notare che l'errore medio per gli outlier è circa 1,3-1,5 volte superiore rispetto ai dati normali per le bande fotometriche r,i,z, 4 volte superiore per la banda g e 10 volte superiore per la banda u.\\Il fatto che gli errori medi nelle bande fotometriche sono più alti per gli outlier, potrebbe significare che la loro posizione anomala possa essere causata da errori di misurazione. In particolare gli outlier nella banda u (ultravioletto) sembrano essere quelli con gli errori di misura più elevati, suggerendo che le misurazioni in questa banda siano più soggette a incertezze rispetto alle altre bande. Questo potrebbe essere dovuto a una maggiore difficoltà nell'osservazione e misurazione della luce ultravioletta, che è più soggetta all'assorbimento da parte dell'atmosfera terrestre e presenta una maggiore variabilità rispetto alle altre bande.
+% \\Di seguito sono riportati i Grafici di dispersione a coppie con distinzione degli outlier (blu) e dei punti normali (rosso), per esaminare le relazioni tra le bande fotometriche (u\_mag, g\_mag, r\_mag, i\_mag, z\_mag), e le correlazioni tra di esse.
+% <<scatter plot matrix, echo=TRUE, fig.width=8, fig.height=5>>=
+% # Visualizzazione degli outlier nei grafici di dispersione
+% library(GGally)
+% outliers_data$outlier <- "Outlier"
+% normal_data$outlier <- "Normale"
+% # Unione dei due dataset
+% combined_data <- rbind(outliers_data, normal_data)
+% # Grafici di dispersione a coppie con distinzione degli outlier
+% ggpairs(combined_data, mapping = aes(color = outlier), columns = c("u_mag", "g_mag", "r_mag", "i_mag", "z_mag"))
+% @
+% Dall'analisi dei grafici di dispersione a coppie che distinguono tra outlier (blu) e punti normali (rosso), e dalle correlazioni riportate per ciascuna relazione tra le bande fotometriche (u_mag, g_mag, r_mag, i_mag, z_mag), possiamo cercare di trarre alcune conclusioni. Le correlazioni sono molto elevate sia per i dati normali che per gli outlier, tra 0.68 e 0.95 per i dati normali, 0.97 e 0.99 per gli outlier.
+%\\In questo dataset significa le identificazioni dei quasar sono complete per le magnitudini i più brillanti (fino a 19), mentre si trovano a essere incomplete per magnitudini più deboli (fatte di oggetti più lontani o meno luminosi).
+
+
+\section{Analisi delle Relazioni}
+In questa sezione verranno esplorate le relazioni tra le variabili del dataset attraverso rappresentazioni grafiche e analisi quantitative. In particolare, si cercherà di individuare eventuali associazioni tra il redshift e le magnitudini nelle diverse bande fotometriche, nonché tra il redshift e le luminosità nelle bande radio e X. Questo per cercare di comprendere meglio le proprietà dei quasar e le relazioni fra le loro caratteristiche fisiche.
+\\Per andare a studiare le relazioni fra le variabili, prima di tutto rimuoviamo gli esempi che hanno valori mancanti oppure outliers.
+<<rimozione degli esempi con valori mancanti, echo=TRUE>>=
+# Rimozione degli esempi con valori mancanti
+data <- dat[complete.cases(dat), ]
+# Rimozione degli outlier
+data <- data[-outliers_indices, ]
+@
+Andiamo adesso a visualizzare i grafi non diretti che rappresentano le relazioni tra le variabili del dataset. Questi grafi sono costruiti utilizzando l'algoritmo Stepwise Forward con selezione basata sull'AIC (Akaike Information Criterion) e sul BIC (Bayesian Information Criterion). Questi criteri permettono di selezionare il modello migliore tra quelli proposti, tenendo conto della complessità del modello e del numero di variabili utilizzate. I grafi non diretti mostrano le relazioni tra le variabili, evidenziando le connessioni più forti e le dipendenze tra di esse.
+<<Grafo Non Diretto, Stepwise, Forward, con AIC, echo=TRUE>>=
+library(gRbase)
+library(gRain)
+library(gRim)
+
+# Rimozione dati non numerici
+dat_num_only <- dat[, !colnames(dat) %in% "SDSS"]
+dat_num_only <- na.omit(dat_num_only)
+dat_num_only <- dat_num_only[!is.infinite(rowSums(dat_num_only)), ]
+sat_dat <- cmod(~.^., data=dat_num_only)
+
+aic_dat_sw_f <- stepwise(sat_dat, direction="forward")
+aic_dat_sw_f
+# Accesso alla componente del grafo (modelinfo$ug)
+graph <- aic_dat_sw_f$modelinfo$ug
+plot(graph, vertex.label = aic_dat_sw_f$varNames, main = "Grafo Non Diretto, Stepwise, Forward, con AIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=labels)
+
+bic_dat_sw_f <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="forward")
+bic_dat_sw_f
+# Accesso alla componente del grafo (modelinfo$ug)
+graph <- bic_dat_sw_f$modelinfo$ug
+plot(graph, vertex.label = bic_dat_sw_f$varNames, main = "Grafo Non Diretto, Stepwise, Forward, con BIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=labels)
+@
+Come possiamo osservare dai grafi non diretti, le dipendenze tra le variabili del dataset sono rappresentate attraverso connessioni tra i nodi. I grafi mostrano le struttura delle dipendenze tra le variabili, evidenziando le forti connessioni e le relazioni più significative. Possiamo osservare che questo grafo è molto denso, con numerose connessioni tra le variabili. Questo suggerisce che le variabili del dataset sono strettamente legate e che le loro relazioni sono complesse e interconnesse. Notiamo come gli errori di misura siano collegati alle magnitudini nelle diverse bande fotometriche e alle luminosità nelle bande radio e X, suggerendo che le incertezze nelle misurazioni possano influenzare le stime delle proprietà dei quasar. Inoltre, il redshift è collegato a tutte le altre variabili, indicando che è una misura chiave delle proprietà fisiche delle sorgenti e che è associato a diverse caratteristiche osservabili. Questo è coerente con le conoscenze astronomiche, poiché il redshift è una misura della distanza e della velocità di allontanamento delle sorgenti, e quindi è legato a molte altre proprietà osservabili.
+\\Questi modelli sono stati costruiti utilizzando l'algoritmo Stepwise Forward con selezione basata sull'AIC (Akaike Information Criterion) e sul BIC (Bayesian Information Criterion). Questi criteri permettono di selezionare il modello migliore tra quelli proposti, tenendo conto della complessità del modello e del numero di variabili utilizzate. Il fatto che nonostante le penalizzazioni per la complessità del modello, il grafo sia molto denso, suggerisce che le dipendenze tra le variabili sono molto forti.
+\\Proviamo per completezza a costruire un modello con l'algoritmo Stepwise Backward.
+<<Grafo Non Diretto, Stepwise, Backward, con AIC, echo=TRUE>>=
+bic_dat_sw_b <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="backward")
+bic_dat_sw_b
+# Accesso alla componente del grafo (modelinfo$ug)
+graph <- bic_dat_sw_f$modelinfo$ug
+plot(graph, vertex.label = bic_dat_sw_b$varNames, main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=labels)
+@
+Anche in questo caso vediamo che le dipendenze tra le variabili sono molto forti e interconnesse, con numerose connessioni tra i nodi.
+\\Proviamo adesso a rimuovere le variabili relative agli errori di misura.
+<<Grafo Non Diretto, Stepwise, Forward, con AIC, senza errori, echo=TRUE>>=
+bic_dat_sw_b2 <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="backward")
+bic_dat_sw_b2
+graph <- graph - "sig_u_mag" - "sig_g_mag" - "sig_r_mag" - "sig_i_mag" - "sig_z_mag"
+plot(graph, vertex.label = colnames(bic_dat_sw_b2), main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=colnames(bic_dat_sw_b2),edge.curved=0.2)
 @
 
-<<linear model 1, echo=TRUE>>=
-a <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat, data = dat)
-summary(a)
+\section{Predizione del Redshift}
+In questa sezione verranno cercate ed analizzate eventuali dipendenze fra il redshift e le altre variabili presenti nel dataset. In particolare, si cercherà di costruire un modello predittivo per il redshift basato sulle magnitudini nelle diverse bande e sulle luminosità nelle bande radio e X. L'obiettivo è di valutare se le proprietà fotometriche e spettrali dei quasar possano essere utilizzate per predire il redshift, che è una misura della distanza e della velocità di allontanamento delle sorgenti.
+\subsection{Divisione del Dataset}
+Prima di procedere con la costruzione del modello predittivo, è necessario dividere il dataset in un set di addestramento e un set di test. Questo permette di valutare le prestazioni del modello su dati non utilizzati durante la fase di addestramento, fornendo una stima più accurata della sua capacità predittiva. In questo caso, verrà utilizzato il 70\% dei dati per l'addestramento e il 30\% per il test.
+<<divisione del dataset, echo=TRUE>>=
+# Divisione dei dati in training e test set
+library(caret)
+set.seed(123)
+data_model <- dat[, !colnames(dat) %in% "SDSS"]
+train_index <- createDataPartition(data_model$z, p = 0.7, list = FALSE)
+train_data <- data_model[train_index, ]
+test_data <- data_model[-train_index, ]
+cat("Training set:", nrow(train_data), "righe\n")
+cat("Test set:", nrow(test_data), "righe\n")
 @
-
-\section{Modelli}
+\subsection{Ricerca del Modello}
+Viene definito adesso un metodo per la valutazione del modello, che verrà utilizzato per valutare le prestazioni dei modelli predittivi. In particolare, verrà utilizzato il coefficiente di determinazione R squared, che misura la proporzione di varianza spiegata dal modello rispetto alla varianza totale dei dati. Un valore di R squared vicino a 1 indica un modello che spiega bene i dati, mentre un valore vicino a 0 indica un modello che non è in grado di spiegare la variazione osservata. Verranno utilizzati anche altri indicatori come il Mean Absolute Error (MAE) e il Root Mean Squared Error (RMSE), che misurano la differenza tra i valori predetti e quelli osservati nei dati di test.
+<<funzione per valutazione del modello, echo=FALSE>>=
+library(Metrics)
+evaluate_model <-function(model, test_data, model_name){
+  predictions <- predict(model, newdata = test_data)
+  mae <- mae(test_data$z, predictions)  # Mean Absolute Error
+  rmse <- rmse(test_data$z, predictions)  # Root Mean Square Error
+  r_squared <- R2(test_data$z, predictions) # R-squared
+  cat("MAE:", round(mae, 4), "\n")
+  cat("RMSE:", round(rmse, 4), "\n")
+  cat("R-squared:", round(r_squared, 4), "\n")
+  ggplot() +
+    geom_point(aes(x = test_data$z, y = predictions), color = "black", alpha = 0.5) +
+    geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+    labs(title = paste("Redshift: Valori Reali vs Predetti. Modello:", model_name),
+         x = "Redshift Reale",
+         y = "Redshift Predetto") +
+    theme_minimal()
+}
+@
+\subsection{Modello di Regressione Lineare}
+Per costruire un modello predittivo per il redshift, verrà utilizzata una regressione lineare multipla che spiega il redshift in funzione delle magnitudini nelle bande fotometriche e delle luminosità nelle bande radio e X. Questo modello permette di valutare l'importanza relativa delle variabili predittive e di stimare i coefficienti di regressione associati a ciascuna di esse.
+<<modello di regressione lineare, echo=TRUE>>=
+# Modello di regressione lineare
+lm_model <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag, data = train_data)
+# Riassunto del modello
+summary(lm_model)
+# Valutazione del modello
+evaluate_model(lm_model, test_data, "Regressione Lineare")
+@
+Questo modello di regressione lineare spiega circa il 43\% della variazione nel redshift, con un Mean Absolute Error (MAE) di 0.49, un Root Mean Squared Error (RMSE) di 0.62 e un R-squared di 0.43. Il grafico mostra la relazione tra i valori reali e predetti del redshift, con una linea rossa che rappresenta la relazione ideale (valori reali = valori predetti). I punti neri rappresentano i valori reali e predetti del redshift, e la loro distribuzione indica quanto bene il modello sia in grado di prevedere i valori osservati.
+\\Sembra che tutte le variabili predittive siano significative, con p-values molto basse, il che suggerisce che le magnitudini nelle bande fotometriche sono associate in modo significativo al redshift dei quasar. Tuttavia, il basso valore di R squared e l'alto valore di RMSE indicano che il modello lineare non è in grado di spiegare appieno la variazione del redshift dei quasar. Questo potrebbe essere dovuto alla presenza di relazioni non lineari o complesse tra le variabili, che non sono catturate da un modello lineare.
+\subsection{Modello con DAG}
+Un'altra tecnica per la costruzione di modelli predittivi è l'utilizzo di grafi diretti aciclici (DAG), che rappresentano le dipendenze causali tra le variabili del dataset. Questi modelli permettono di esplorare le relazioni tra le variabili e di identificare le dipendenze dirette e indirette tra di esse. In questo caso, verrà utilizzato un modello DAG per tentare di predire il redshift in funzione delle magnitudini nelle bande fotometriche.
+<<modello con DAG, echo=TRUE>>=
+# Modello con DAG
+dag_model <- dag(~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat + Mp + z, data = train_data)
+# Riassunto del modello
+summary(dag_model)
+# Valutazione del modello
+evaluate_model(dag_model, test_data, "DAG")
+@
+\subsection{Modello con Random Forest}
+<<modello con Random Forest, echo=TRUE>>=
+library(randomForest)
+rf_model <- randomForest(z ~ ., data = train_data, ntree = 50)
+print(rf_model)
+evaluate_model(rf_model, test_data, "Random Forest")
+@
+\subsection{Modello con Gradient Boosting Machine}
+<<modello con Gradient Boosting Machine, echo=TRUE>>=
+library(gbm)
+gbm_model <- gbm(z ~ ., data = train_data, n.trees = 1000, distribution = "gaussian", interaction.depth = 4)
+summary(gbm_model)
+predictions_gbm <- predict(gbm_model, newdata = test_data)
+evaluate_model(gbm_model, test_data, "Gradient Boosting Machine")
+@
 
 
 \end{document}  

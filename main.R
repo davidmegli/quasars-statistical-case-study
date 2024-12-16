@@ -151,3 +151,218 @@ library(corrplot)
 corrplot(matrice_cor, type = "upper", order = "hclust", 
          tl.col = "black", tl.srt = 45, title = "Matrice di Correlazione",mar=c(0,0,2,0),addCoef.col = "black")
 
+# Grafici di dispersione (Scatterplot Matrix)
+library(GGally)
+ggpairs(data.frame(u_mag, g_mag, r_mag, i_mag, z_mag))
+
+# Analisi della distribuzione della magnitudine i
+hist(dat$i, breaks = 30, col = "blue", main = "Distribuzione di i", xlab = "Magnitudine i")
+abline(v = 19, col = "red", lwd = 2, lty = 2)  # Linea per i = 19
+
+# Relazione tra Redshift (z) e Magnitudini ugriz
+plot(dat$z, dat$u, main = "Redshift vs Magnitudine u", xlab = "Redshift", ylab = "Magnitudine u", col = "blue")
+boxplot(u ~ cut(z, breaks = c(0, 2, 4, Inf)), data = dat, main = "Magnitudine u per Redshift", xlab = "Gruppi di z", ylab = "Magnitudine u")
+
+
+
+
+# Calcolo dello Z-score per ciascuna colonna
+z_scores <- scale(dat[, c("u_mag", "g_mag", "r_mag", "i_mag", "z_mag")])
+# Identificazione outlier dove |Z-score| > 3
+outliers_u <- which(abs(z_scores[, "u_mag"]) > 3)
+outliers_g <- which(abs(z_scores[, "g_mag"]) > 3)
+outliers_r <- which(abs(z_scores[, "r_mag"]) > 3)
+outliers_i <- which(abs(z_scores[, "i_mag"]) > 3)
+outliers_z <- which(abs(z_scores[, "z_mag"]) > 3)
+# Unione di outliers identificati
+outliers_indices <- unique(c(outliers_u, outliers_g, outliers_r, outliers_i, outliers_z))
+# Creazione di un dataframe con soli outlier
+outliers_data <- dat[outliers_indices, ]
+normal_data <- dat[-outliers_indices, ]  # Esclusione degli outlier
+# Calcolo della media degli errori per outlier e dati normali
+error_means_outliers <- colMeans(outliers_data[, c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")], na.rm = TRUE)
+error_means_normal <- colMeans(normal_data[, c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")], na.rm = TRUE)
+# Stampa a video dei risultati
+print("Media degli errori di misura per gli outlier:")
+print(error_means_outliers)
+
+print("Media degli errori di misura per i dati normali:")
+print(error_means_normal)
+
+print("Rapporto tra le medie degli errori di misura per outlier e dati normali:")
+print(error_means_outliers / error_means_normal)
+
+# Visualizzazione della differenza con un grafico
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+# Prepararazione dei dati per il grafico
+error_df <- data.frame(
+  Banda = c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag"),
+  Errore_Outlier = error_means_outliers,
+  Errore_Normale = error_means_normal
+)
+error_long <- error_df %>%
+  pivot_longer(cols = c(Errore_Outlier, Errore_Normale), 
+               names_to = "Tipo", 
+               values_to = "Errore")
+# Grafico a barre per confrontare gli errori
+ggplot(error_long, aes(x = Banda, y = Errore, fill = Tipo)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  labs(title = "Confronto degli errori di misura tra outliers e dati normali",
+       y = "Errore medio", x = "Bande") +
+  scale_fill_manual(values = c("Errore_Outlier" = "red", "Errore_Normale" = "blue"),
+                    labels = c("Errore_Outlier" = "Outlier", "Errore_Normale" = "Normale")) +
+  guides(fill = guide_legend(title = "Legenda")) +
+  theme_minimal()
+
+
+
+# Visualizzazione degli outlier nei grafici di dispersione
+library(GGally)
+outliers_data$outlier <- "Outlier"
+normal_data$outlier <- "Normale"
+# Unione dei due dataset
+combined_data <- rbind(outliers_data, normal_data)
+# Grafici di dispersione a coppie con distinzione degli outlier
+ggpairs(combined_data, mapping = aes(color = outlier), columns = c("u_mag", "g_mag", "r_mag", "i_mag", "z_mag"))
+
+
+# DIVISIONE DEL DATASET IN DATI COMPLETI E INCOMPLETI
+# creo colonna "complete" con valore 1 se i_mag < 19, 0 altrimenti
+dat$complete <- ifelse(dat$i_mag < 19, 1, 0)
+# Creo una colonna che contiene la somma di tutti gli errori
+dat$error_sum <- rowSums(dat[, c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")])
+var_a <- lm(dat$error_sum ~ dat$complete, data=dat)
+summary(var_a)
+var_b <- lm(z ~ i_mag, data=dat)
+summary(var_b)
+
+
+
+# Split dataset based su i_mag
+dataset_complete <- subset(dat, i_mag < 19)
+dataset_incomplete <- subset(dat, i_mag >= 19)
+# Controllo dela dimensione dei nuovi dataset
+cat("Dati completi (i_mag < 19):", nrow(dataset_complete), "righe\n")
+cat("Dati incompleti (i_mag >= 19):", nrow(dataset_incomplete), "righe\n")
+
+
+# 1) Analisi delle Relazioni
+# Rimozione degli esempi con valori mancanti
+data <- dat[complete.cases(dat), ]
+# Rimozione degli outlier
+data <- data[-outliers_indices, ]
+
+library(gRbase)
+library(gRain)
+library(gRim)
+#Udirected graph
+ug0 <- ug(~z*u_mag+u_mag*g_mag+g_mag*r_mag+r_mag*i_mag+i_mag*z_mag)
+ug0 <- ug(~a:b+b:c:d+e)
+ug0
+
+# Rimozione dati non numerici
+dat_num_only <- dat[, !colnames(dat) %in% "SDSS"]
+dat_num_only <- na.omit(dat_num_only)
+dat_num_only <- dat_num_only[!is.infinite(rowSums(dat_num_only)), ]
+sat_dat <- cmod(~.^., data=dat_num_only)
+
+aic_dat_sw_f <- stepwise(sat_dat, direction="forward")
+aic_dat_sw_f
+# Accesso alla componente del grafo (modelinfo$ug)
+graph <- aic_dat_sw_f$modelinfo$ug
+plot(graph, vertex.label = aic_dat_sw_f$varNames, main = "Grafo Non Diretto, Stepwise, Forward, con AIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=labels)
+
+bic_dat_sw_f <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="forward")
+bic_dat_sw_f
+# Accesso alla componente del grafo (modelinfo$ug)
+graph <- bic_dat_sw_f$modelinfo$ug
+plot(graph, vertex.label = bic_dat_sw_f$varNames, main = "Grafo Non Diretto, Stepwise, Forward, con BIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=labels)
+
+bic_dat_sw_b <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="backward")
+bic_dat_sw_b
+# Accesso alla componente del grafo (modelinfo$ug)
+graph <- bic_dat_sw_f$modelinfo$ug
+plot(graph, vertex.label = bic_dat_sw_b$varNames, main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=labels)
+
+
+bic_dat_sw_b2 <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="backward")
+bic_dat_sw_b2
+graph <- graph - "sig_u_mag" - "sig_g_mag" - "sig_r_mag" - "sig_i_mag" - "sig_z_mag"
+plot(graph, vertex.label = colnames(bic_dat_sw_b2), main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
+     ,vertex.size=30,edge.width=2,vertex.labels=colnames(bic_dat_sw_b2),edge.curved=0.2)
+
+
+# 2) Predizione del Redshift (z)
+library(Metrics)
+evaluate_model <-function(model, test_data, model_name){
+  predictions <- predict(model, newdata = test_data)
+  mae <- mae(test_data$z, predictions)  # Mean Absolute Error
+  rmse <- rmse(test_data$z, predictions)  # Root Mean Square Error
+  r_squared <- R2(test_data$z, predictions) # R-squared
+  cat("MAE:", round(mae, 4), "\n")
+  cat("RMSE:", round(rmse, 4), "\n")
+  cat("R-squared:", round(r_squared, 4), "\n")
+  ggplot() +
+    geom_point(aes(x = test_data$z, y = predictions), color = "black", alpha = 0.5) +
+    geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+    labs(title = paste("Redshift: Valori Reali vs Predetti. Modello:", model_name),
+         x = "Redshift Reale",
+         y = "Redshift Predetto") +
+    theme_minimal()
+}
+
+
+# Divisione dei dati in training e test set
+library(caret)
+set.seed(123)
+data_model <- dat[, !colnames(dat) %in% "SDSS"]
+train_index <- createDataPartition(data_model$z, p = 0.7, list = FALSE)
+train_data <- data_model[train_index, ]
+test_data <- data_model[-train_index, ]
+cat("Training set:", nrow(train_data), "righe\n")
+cat("Test set:", nrow(test_data), "righe\n")
+
+# Modello di regressione lineare
+lm_model <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag, data = train_data)
+# Riassunto del modello
+summary(lm_model)
+# Valutazione del modello
+evaluate_model(lm_model, test_data, "Regressione Lineare")
+
+# Modello di Regressione Lineare con Variabili Aggiuntive
+lm_model_additional <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat, data = train_data)
+# Riassunto del modello
+summary(lm_model_additional)
+# Valutazione del modello
+evaluate_model(lm_model_additional, test_data, "Regressione Lineare con Variabili Aggiuntive")
+
+# Modello di Regressione Lineare con Variabili Interattive
+
+# Modello di Regressione Lineare con Variabili Polinomiali
+
+# Modello di Regressione Lineare con Variabili Trasformate
+
+# Modello di Regressione Lineare con Variabili Selezionate
+
+# Modello di Regressione Lineare con Regolarizzazione
+
+# Modello di Regressione Lineare con Regolarizzazione e Variabili Selezionate
+
+
+library(randomForest)
+rf_model <- randomForest(z ~ ., data = train_data, ntree = 50, importance = TRUE, do.trace = TRUE)
+print(rf_model)
+evaluate_model(rf_model, test_data, "Random Forest")
+
+library(gbm)
+gbm_model <- gbm(z ~ ., data = train_data, n.trees = 1000, distribution = "gaussian", interaction.depth = 4)
+summary(gbm_model)
+predictions_gbm <- predict(gbm_model, newdata = test_data)
+evaluate_model(gbm_model, test_data, "Gradient Boosting Machine")
+
+

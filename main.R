@@ -54,6 +54,61 @@ library(ggplot2)
 
 summary(dat)
 
+dat_long <- dat %>%
+  pivot_longer(
+    cols = c(u_mag, g_mag, r_mag, i_mag, z_mag), # Colonne da trasformare
+    names_to = "banda",      # Nuova colonna per i nomi delle bande
+    values_to = "value"      # Nuova colonna per le magnitudini
+  )
+# Rimozione di 0 da dat_long
+dat_long <- dat_long[dat_long$value != 0, ]
+ggplot(dat_long, aes(x = value, y = z)) +
+  geom_boxplot(fill = "lightblue", color = "blue") +
+  labs(
+    title = "Distribuzione delle magnitudini ugriz",
+    x = "Bande",
+    y = "Magnitudine"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+dat_long <- dat %>%
+  pivot_longer(
+    cols = c(u_mag, g_mag, r_mag, i_mag, z_mag), # Colonne da trasformare
+    names_to = "banda",      # Nuova colonna per i nomi delle bande
+    values_to = "value"      # Nuova colonna per le magnitudini
+  )
+# Rimozione di 0 da dat_long
+dat_long <- dat_long[dat_long$value != 0, ]
+ggplot(dat_long, aes(x = banda, y = value)) +
+  geom_boxplot(fill = "lightblue", color = "blue") +
+  labs(
+    title = "Distribuzione delle magnitudini ugriz",
+    x = "Bande",
+    y = "Magnitudine"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+dat_sig_long <- dat %>%
+  pivot_longer(
+    cols = c(sig_u_mag, sig_g_mag, sig_r_mag, sig_i_mag, sig_z_mag), # Colonne da trasformare
+    names_to = "banda",      # Nuova colonna per i nomi delle bande
+    values_to = "errore"     # Nuova colonna per gli errori
+  )
+# Rimozone di 0 da dat_sig_long
+ggplot(dat_sig_long, aes(x = banda, y = errore)) +
+  geom_boxplot(fill = "lightblue", color = "blue") +
+  labs(
+    title = "Distribuzione degli errori per le magnitudini ugriz",
+    x = "Bande",
+    y = "Errore di misura"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Creazione di un istogramma per il Redshift
 ggplot(dat, aes(x = z)) +
   geom_histogram(bins = 50, fill = "red", color = "black") +
   labs(
@@ -185,12 +240,32 @@ error_means_normal <- colMeans(normal_data[, c("sig_u_mag", "sig_g_mag", "sig_r_
 # Stampa a video dei risultati
 print("Media degli errori di misura per gli outlier:")
 print(error_means_outliers)
-
 print("Media degli errori di misura per i dati normali:")
 print(error_means_normal)
-
 print("Rapporto tra le medie degli errori di misura per outlier e dati normali:")
 print(error_means_outliers / error_means_normal)
+
+
+# Identificazione degli outlier: righe con i_mag < 19
+outliers_indices <- which(dat$i_mag >= 19)
+# Creazione di un dataframe con soli outlier
+outliers_data <- dat[outliers_indices, ]
+normal_data <- dat[-outliers_indices, ]  # Esclusione degli outlier
+# Calcolo della media degli errori per outlier e dati normali
+error_means_outliers <- colMeans(outliers_data[, c("sig_u_mag",
+  "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")], na.rm = TRUE)
+error_means_normal <- colMeans(normal_data[, c("sig_u_mag",
+  "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")], na.rm = TRUE)
+# Stampa a video dei risultati
+print("Media degli errori di misura per gli outlier (i_mag < 19):")
+print(error_means_outliers)
+print("Media degli errori di misura per i dati normali:")
+print(error_means_normal)
+print("Rapporto tra le medie degli errori di misura per outlier e dati normali:")
+print(error_means_outliers / error_means_normal)
+
+
+
 
 # Visualizzazione della differenza con un grafico
 library(ggplot2)
@@ -290,12 +365,24 @@ plot(graph, vertex.label = bic_dat_sw_b$varNames, main = "Grafo Non Diretto, Ste
      ,vertex.size=30,edge.width=2,vertex.labels=labels)
 
 
-bic_dat_sw_b2 <- stepwise(sat_dat, k=log(nrow(dat_num_only)), direction="backward")
+bic_dat_sw_b2 <- stepwise(sat_dat, k=log(nrow(dat_num_only)),
+                          direction="backward")
 bic_dat_sw_b2
-graph <- graph - "sig_u_mag" - "sig_g_mag" - "sig_r_mag" - "sig_i_mag" - "sig_z_mag"
-plot(graph, vertex.label = colnames(bic_dat_sw_b2), main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
-     ,vertex.size=30,edge.width=2,vertex.labels=colnames(bic_dat_sw_b2),edge.curved=0.2)
+graph <- graph - "sig_u_mag" - "sig_g_mag" - "sig_r_mag" -
+  "sig_i_mag" - "sig_z_mag"
+plot(graph, vertex.label = colnames(bic_dat_sw_b2),
+     main = "Grafo Non Diretto, Stepwise, Backward, con BIC"
+     ,vertex.size=30,edge.width=2,
+     vertex.labels=colnames(bic_dat_sw_b2),edge.curved=0.2)
 
+# Uso bnlearn
+library(bnlearn)
+# Creazione del modello
+model <- hc(dat_num_only)
+# Stampa del modello
+print(model)
+# Plot del modello
+plot(model)
 
 # 2) Predizione del Redshift (z)
 library(Metrics)
@@ -333,25 +420,48 @@ lm_model <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag, data = train_data)
 summary(lm_model)
 # Valutazione del modello
 evaluate_model(lm_model, test_data, "Regressione Lineare")
-
 # Modello di Regressione Lineare con Variabili Aggiuntive
-lm_model_additional <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + first + rosat, data = train_data)
+lm_model_additional <- lm(z ~ u_mag + g_mag + r_mag + i_mag + z_mag + FIRST + ROSAT, data = train_data)
 # Riassunto del modello
 summary(lm_model_additional)
 # Valutazione del modello
 evaluate_model(lm_model_additional, test_data, "Regressione Lineare con Variabili Aggiuntive")
 
-# Modello di Regressione Lineare con Variabili Interattive
 
-# Modello di Regressione Lineare con Variabili Polinomiali
+# Bayesian Network
+library(bnlearn)
+# Creazione del modello
+model <- hc(train_data)
+# Rimozione delle variabili con errori
+train_data <- train_data[, !colnames(train_data) %in% c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")]
+test_data <- test_data[, !colnames(test_data) %in% c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")]
+# Apprendimento dei parametri della rete
+fitted_model <- bn.fit(model, data = train_data)
+# Stampa del modello appreso
+print(fitted_model)
+# Plot della struttura della rete
+plot(model)
+# Uso della funzione predict per il nodo "z" usando la rete appresa
+predictions <- predict(fitted_model, node = "z", data = test_data, method = "bayes-lw")
+mae <- mae(test_data$z, predictions)  # Mean Absolute Error
+rmse <- rmse(test_data$z, predictions)  # Root Mean Square Error
+r_squared <- R2(test_data$z, predictions) # R-squared
+cat("MAE:", round(mae, 4), "\n")
+cat("RMSE:", round(rmse, 4), "\n")
+cat("R-squared:", round(r_squared, 4), "\n")
+# Plot dei valori reali vs predetti
+ggplot() +
+  geom_point(aes(x = test_data$z, y = predictions), color = "black", alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "Redshift: Valori Reali vs Predetti. Modello: Bayesian Network",
+       x = "Redshift Reale",
+       y = "Redshift Predetto") +
+  theme_minimal()
 
-# Modello di Regressione Lineare con Variabili Trasformate
 
-# Modello di Regressione Lineare con Variabili Selezionate
-
-# Modello di Regressione Lineare con Regolarizzazione
-
-# Modello di Regressione Lineare con Regolarizzazione e Variabili Selezionate
+model <- pc(train_data)
+print(model)
+plot(model)
 
 
 library(randomForest)
@@ -365,4 +475,29 @@ summary(gbm_model)
 predictions_gbm <- predict(gbm_model, newdata = test_data)
 evaluate_model(gbm_model, test_data, "Gradient Boosting Machine")
 
+#Correlazione fra redshift ed errori di misura
+correlation <- cor(dat_num_only)
+correlation_z <- correlation["z", c("sig_u_mag", "sig_g_mag", "sig_r_mag", "sig_i_mag", "sig_z_mag")]
+print(correlation_z)
+# Plot della correlazione
+barplot(correlation_z, col = "blue", main = "Correlazione tra Redshift e Errori di Misura",
+        xlab = "Errori di Misura", ylab = "Correlazione")
 
+
+
+
+sig_u_mag_linear <- 10^(-sig_u_mag/2.5)
+dat2 <- dat_num_only
+dat2$sig_u_mag_linear <- sig_u_mag_linear
+red <- lm(z ~ sig_u_mag_linear , data = dat2)
+summary(red)
+
+# plot redshift e sig_u_mag
+ggplot(dat2, aes(x = sig_u_mag_linear, y = z)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  labs(
+    title = "Relazione tra Redshift e Errore di Misura per la banda u",
+    x = "Errore di Misura (u)",
+    y = "Redshift (z)"
+  ) +
+  theme_minimal()
